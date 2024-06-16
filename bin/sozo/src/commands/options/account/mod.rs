@@ -12,7 +12,13 @@ use tracing::trace;
 use super::signer::SignerOptions;
 use super::DOJO_ACCOUNT_ADDRESS_ENV_VAR;
 
+#[cfg(feature = "controller")]
+pub mod controller;
 mod r#type;
+
+#[cfg(feature = "controller")]
+use controller::ControllerSessionAccount;
+pub use r#type::*;
 
 // INVARIANT:
 // - For commandline: we can either specify `private_key` or `keystore_path` along with
@@ -44,6 +50,21 @@ pub struct AccountOptions {
 }
 
 impl AccountOptions {
+    /// Create a new Catridge Controller account based on session key.
+    #[cfg(feature = "controller")]
+    pub async fn controller<P>(
+        &self,
+        rpc_url: url::Url,
+        provider: P,
+        config: &scarb::core::Config,
+    ) -> Result<ControllerSessionAccount<P>>
+    where
+        P: Provider,
+        P: Send + Sync,
+    {
+        controller::create_controller(rpc_url, provider, config).await
+    }
+
     pub async fn account<P>(
         &self,
         provider: P,
