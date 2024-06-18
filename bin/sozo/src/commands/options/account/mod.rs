@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use clap::Args;
 use dojo_world::metadata::Environment;
 use scarb::core::Config;
@@ -65,7 +65,9 @@ impl AccountOptions {
         P: Provider,
         P: Send + Sync,
     {
-        controller::create_controller(rpc_url, provider, config).await
+        controller::create_controller(rpc_url, provider, config)
+            .await
+            .context("Failed to create a Controller account")
     }
 
     pub async fn account<P>(
