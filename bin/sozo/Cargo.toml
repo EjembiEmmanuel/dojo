@@ -6,10 +6,8 @@ version.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# account-sdk = { git = "https://github.com/cartridge-gg/controller", rev = "c48d718" }
-# account-sdk = { git = "https://github.com/piniom/controller.git", rev = "58e5d39" }
-account-sdk = { path = "../../../../cartridge/controller-internal/crates/account_sdk", optional = true }
-slot = { git = "https://github.com/cartridge-gg/slot", rev = "f5d674c", optional = true }
+account_sdk = { workspace = true, optional = true }
+slot = { workspace = true, optional = true }
 
 anyhow.workspace = true
 async-trait.workspace = true
@@ -72,5 +70,5 @@ katana-runner.workspace = true
 snapbox = "0.4.6"
 
 [features]
-controller = [ "dep:account-sdk", "dep:slot" ]
+controller = [ "dep:account_sdk", "dep:slot" ]
 default = [ "controller" ]

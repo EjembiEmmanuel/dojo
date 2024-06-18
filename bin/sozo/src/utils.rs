@@ -63,16 +63,8 @@ pub async fn world_from_env_metadata(
 ) -> Result<WorldContract<SozoAccount<JsonRpcClient<HttpTransport>>>, Error> {
     let world_address = world.address(env_metadata.as_ref())?;
     let provider = starknet.provider(env_metadata.as_ref())?;
-
-    #[cfg(feature = "controller")]
-    if account.controller {
-        let url = starknet.url(env_metadata.as_ref())?;
-        let account = account.controller(url, provider, config).await?;
-        return Ok(WorldContract::new(world_address, SozoAccount::from(account)));
-    }
-
-    let account = account.account(provider, env_metadata.as_ref()).await?;
-    Ok(WorldContract::new(world_address, SozoAccount::from(account)))
+    let account = account.account(provider, &starknet, env_metadata.as_ref(), config).await?;
+    Ok(WorldContract::new(world_address, account))
 }
 
 /// Build a world contract reader from the provided environment.

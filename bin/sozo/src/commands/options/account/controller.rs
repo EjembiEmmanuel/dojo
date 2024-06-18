@@ -57,7 +57,7 @@ where
             info!(path = manifest_path.as_str(), "Extracing policies from project manifest.");
 
             let manifest = DeploymentManifest::load_from_path(&manifest_path)?;
-            let policies = collect_policies(root_dir, manifest);
+            let policies = collect_policies(root_dir, manifest, contract_address);
 
             info!(policies_count = policies.len(), "Extracted policies from project.");
 
@@ -98,7 +98,11 @@ where
 }
 
 /// Collect all the contracts' methods in the current project and convert them into policies.
-fn collect_policies(root_dir: impl AsRef<Path>, manifest: DeploymentManifest) -> Vec<Policy> {
+fn collect_policies(
+    root_dir: impl AsRef<Path>,
+    manifest: DeploymentManifest,
+    user_address: FieldElement,
+) -> Vec<Policy> {
     let mut policies: Vec<Policy> = Vec::new();
     let root_dir: Utf8PathBuf = root_dir.as_ref().to_path_buf().try_into().unwrap();
 
@@ -118,7 +122,7 @@ fn collect_policies(root_dir: impl AsRef<Path>, manifest: DeploymentManifest) ->
 
     // for sending declare tx
     let method = "__declare_transaction__".to_string();
-    policies.push(Policy { target: contract_address, method });
+    policies.push(Policy { target: user_address, method });
     info!("Adding declare transaction policy");
 
     // for deploying using udc
@@ -142,7 +146,7 @@ fn policies_from_abis(
             AbiEntry::Function(f) => {
                 let method = f.name.to_string();
                 let policy = Policy { target: contract_address, method };
-                info!(name = contract_name, policy = ?policy, "Adding policy");
+                info!(name = contract_name, target = format!("{:#x}", policy.target), method = %policy.method, "Adding policy");
                 policies.push(policy);
             }
 
