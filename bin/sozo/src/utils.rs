@@ -10,7 +10,7 @@ use semver::Version;
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::JsonRpcClient;
 
-use crate::commands::options::account::{AccountOptions, SozoAccount};
+use crate::commands::options::account::{AccountOptions, SozoAccount, WorldAddressOrName};
 use crate::commands::options::starknet::StarknetOptions;
 use crate::commands::options::world::WorldOptions;
 
@@ -61,9 +61,20 @@ pub async fn world_from_env_metadata(
     env_metadata: &Option<Environment>,
     config: &Config,
 ) -> Result<WorldContract<SozoAccount<JsonRpcClient<HttpTransport>>>, Error> {
-    let world_address = world.address(env_metadata.as_ref())?;
-    let provider = starknet.provider(env_metadata.as_ref())?;
-    let account = account.account(provider, &starknet, env_metadata.as_ref(), config).await?;
+    let env_metadata = env_metadata.as_ref();
+
+    let world_address = world.address(env_metadata)?;
+    let provider = starknet.provider(env_metadata)?;
+    let account = account
+        .account(
+            provider,
+            WorldAddressOrName::Address(world_address),
+            &starknet,
+            env_metadata,
+            config,
+        )
+        .await?;
+
     Ok(WorldContract::new(world_address, account))
 }
 
