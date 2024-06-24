@@ -17,5 +17,6 @@ runner-macro = { path = "./runner-macro" }
 serde.workspace = true
 serde_json.workspace = true
 starknet.workspace = true
+thiserror.workspace = true
 tokio.workspace = true
 url.workspace = true

@@ -1,3 +1,4 @@
+mod binding;
 mod logs;
 mod prefunded;
 mod utils;
