@@ -16,7 +16,7 @@ use cairo_lang_utils::ordered_hash_map::OrderedHashMap;
 use camino::Utf8PathBuf;
 use scarb::compiler::{CairoCompilationUnit, CompilationUnit, CompilationUnitAttributes};
 use scarb::core::Config;
-use scarb::ops::{CompileOpts, FeaturesOpts, FeaturesSelector};
+use scarb::ops::CompileOpts;
 use smol_str::SmolStr;
 use tracing::trace;
 
@@ -88,10 +88,7 @@ pub fn compile_workspace(config: &Config, opts: CompileOpts) -> Result<CompileIn
     let packages: Vec<scarb::core::PackageId> = ws.members().map(|p| p.id).collect();
     let resolve = scarb::ops::resolve_workspace(&ws)?;
 
-    let features_opts =
-        FeaturesOpts { features: FeaturesSelector::AllFeatures, no_default_features: false };
-
-    let compilation_units = scarb::ops::generate_compilation_units(&resolve, &features_opts, &ws)?
+    let compilation_units = scarb::ops::generate_compilation_units(&resolve, &opts.features, &ws)?
         .into_iter()
         .filter(|cu| !opts.exclude_targets.contains(&cu.main_component().target_kind()))
         .filter(|cu| {

@@ -7,7 +7,8 @@ use dojo_world::metadata::dojo_metadata_from_workspace;
 use prettytable::format::consts::FORMAT_NO_LINESEP_WITH_TITLE;
 use prettytable::{format, Cell, Row, Table};
 use scarb::core::{Config, TargetKind};
-use scarb::ops::{CompileOpts, FeaturesOpts, FeaturesSelector};
+use scarb::ops::CompileOpts;
+use scarb_ui::args::FeaturesSpec;
 use sozo_ops::statistics::{get_contract_statistics_for_dir, ContractStatistics};
 use tracing::trace;
 
@@ -18,7 +19,7 @@ const CONTRACT_CLASS_SIZE_LABEL: &str = "Contract Class size [in bytes]\n(Sierra
 
 const CONTRACT_NAME_LABEL: &str = "Contract";
 
-#[derive(Debug, Args, Default)]
+#[derive(Debug, Args)]
 pub struct BuildArgs {
     // Should we deprecate typescript bindings codegen?
     // Disabled due to lack of support in dojo.js
@@ -39,6 +40,9 @@ pub struct BuildArgs {
 
     #[arg(long, help = "Display statistics about the compiled contracts")]
     pub stats: bool,
+
+    #[command(flatten)]
+    pub features: FeaturesSpec,
 }
 
 impl BuildArgs {
@@ -55,15 +59,12 @@ impl BuildArgs {
         let profile_dir = manifest_dir.join(MANIFESTS_DIR).join(profile_name);
         CleanArgs::clean_manifests(&profile_dir)?;
 
-        let features_opts =
-            FeaturesOpts { features: FeaturesSelector::AllFeatures, no_default_features: false };
-
         let compile_info = compile_workspace(
             config,
             CompileOpts {
                 include_targets: vec![],
                 exclude_targets: vec![TargetKind::TEST],
-                features: features_opts,
+                features: self.features.try_into()?,
             },
         )?;
         trace!(?compile_info, "Compiled workspace.");
@@ -135,6 +136,19 @@ impl BuildArgs {
         };
 
         Ok(())
+    }
+
+    // implement default manually since `FeatureSpec` doesn't implement `Default` trait
+    pub fn default() -> Self {
+        let features =
+            FeaturesSpec { features: vec![], all_features: false, no_default_features: false };
+        Self {
+            features,
+            typescript_v2: false,
+            unity: false,
+            bindings_output: "bindings".to_string(),
+            stats: false,
+        }
     }
 }
 
