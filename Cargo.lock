@@ -8348,6 +8348,7 @@ dependencies = [
  "starknet",
  "thiserror",
  "tokio",
+ "tracing",
  "url",
 ]
 

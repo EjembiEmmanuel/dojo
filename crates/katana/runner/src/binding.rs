@@ -14,6 +14,7 @@ use starknet::core::types::FromStrError;
 use starknet::macros::short_string;
 use starknet::signers::SigningKey;
 use thiserror::Error;
+use tracing::trace;
 use url::Url;
 
 /// How long we will wait for katana to indicate that it is ready.
@@ -274,8 +275,8 @@ impl Katana {
     }
 
     /// Sets the number of pre-funded accounts to generate.
-    pub fn accounts<T: Into<u16>>(mut self, accounts: T) -> Self {
-        self.accounts = Some(accounts.into());
+    pub fn accounts(mut self, accounts: u16) -> Self {
+        self.accounts = Some(accounts);
         self
     }
 
@@ -377,7 +378,8 @@ impl Katana {
     pub fn try_spawn(self) -> Result<KatanaInstance, KatanaError> {
         let mut cmd = self.program.as_ref().map_or_else(|| Command::new("katana"), Command::new);
         cmd.stdout(std::process::Stdio::piped()).stderr(std::process::Stdio::inherit());
-        let mut port = self.port.unwrap_or(5050);
+        let mut port = self.port.unwrap_or(0);
+        cmd.arg("--port").arg(port.to_string());
 
         if self.silent {
             cmd.arg("--silent");
@@ -419,8 +421,6 @@ impl Katana {
             cmd.arg("--metrics").arg(metrics);
         }
 
-        cmd.arg("-p").arg(port.to_string());
-
         if let Some(host) = self.host {
             cmd.arg("--host").arg(host);
         }
@@ -460,7 +460,6 @@ impl Katana {
         cmd.args(self.args);
 
         let mut child = cmd.spawn().map_err(KatanaError::SpawnError)?;
-
         let stdout = child.stdout.as_mut().ok_or(KatanaError::NoStderr)?;
 
         let start = Instant::now();
@@ -478,9 +477,9 @@ impl Katana {
 
             let mut line = String::new();
             reader.read_line(&mut line).map_err(KatanaError::ReadLineError)?;
-            // trace!(target: "anvil", line);
-            if let Some(addr) = line.strip_prefix("Listening on") {
-                // <Listening on 127.0.0.1:8545>
+            trace!(target: "katana", line);
+            if let Some(addr) = line.strip_prefix("🚀 JSON-RPC server started:") {
+                // <🚀 JSON-RPC server started: http://0.0.0.0:5050>
                 // parse the actual port
                 if let Ok(addr) = SocketAddr::from_str(addr.trim()) {
                     port = addr.port();
@@ -489,19 +488,14 @@ impl Katana {
             }
 
             if line.starts_with("| Account address |") {
-                let address_str = line
-                    .split_once('|')
-                    .and_then(|(_, s)| s.trim().split_once(' '))
-                    .and_then(|(_, s)| Some(s.trim()));
-
-                if let Some(addr) = address_str {
-                    let address = FieldElement::from_str(addr)?;
+                if let Some(addr) = line.strip_prefix("| Account address |").map(|s| s.trim()) {
+                    let address = FieldElement::from_str(dbg!(&addr))?;
 
                     let private_key = if line.starts_with("| Private key     |") {
                         let private_key_str = line
                             .split_once('|')
                             .and_then(|(_, s)| s.trim().split_once(' '))
-                            .and_then(|(_, s)| Some(s.trim()));
+                            .map(|(_, s)| s.trim());
 
                         if let Some(priv_key) = private_key_str {
                             let private_key = FieldElement::from_str(priv_key)?;
@@ -520,5 +514,38 @@ impl Katana {
         }
 
         Ok(KatanaInstance { port, child, accounts, chain_id })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn can_launch_katana() {
+        let _ = Katana::new().spawn();
+    }
+
+    #[test]
+    fn can_launch_katana_with_more_accounts() {
+        let _ = Katana::new().accounts(20).spawn();
+    }
+
+    #[test]
+    fn assert_block_time_is_natural_number() {
+        let katana = Katana::new().block_time(12);
+        assert_eq!(katana.block_time.unwrap().to_string(), "12");
+        let _ = katana.spawn();
+    }
+
+    #[test]
+    fn can_launch_katana_with_sub_seconds_block_time() {
+        let _ = Katana::new().block_time(500).spawn();
+    }
+
+    #[test]
+    fn assert_chain_id_without_rpc() {
+        let katana = Katana::new().spawn();
+        assert_eq!(katana.chain_id(), short_string!("KATANA"));
     }
 }
