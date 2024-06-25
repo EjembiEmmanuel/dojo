@@ -68,6 +68,7 @@ pub fn copy_build_project_temp(
 
     let features_opts =
         FeaturesOpts { features: FeaturesSelector::AllFeatures, no_default_features: false };
+    let packages: Vec<scarb::core::PackageId> = ws.members().map(|p| p.id).collect();
 
     let compile_info = if do_build {
         Some(
@@ -78,6 +79,7 @@ pub fn copy_build_project_temp(
                     exclude_targets: vec![TargetKind::TEST],
                     features: features_opts,
                 },
+                packages,
             )
             .unwrap(),
         )

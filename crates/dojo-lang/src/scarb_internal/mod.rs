@@ -15,7 +15,7 @@ use cairo_lang_test_plugin::test_plugin_suite;
 use cairo_lang_utils::ordered_hash_map::OrderedHashMap;
 use camino::Utf8PathBuf;
 use scarb::compiler::{CairoCompilationUnit, CompilationUnit, CompilationUnitAttributes};
-use scarb::core::Config;
+use scarb::core::{Config, PackageId};
 use scarb::ops::CompileOpts;
 use smol_str::SmolStr;
 use tracing::trace;
@@ -83,9 +83,12 @@ pub fn build_scarb_root_database(unit: &CairoCompilationUnit) -> Result<RootData
 /// This function is an alternative to `ops::compile`, it's doing the same job.
 /// However, we can control the injection of the plugins, required to have dojo plugin present
 /// for each compilation.
-pub fn compile_workspace(config: &Config, opts: CompileOpts) -> Result<CompileInfo> {
+pub fn compile_workspace(
+    config: &Config,
+    opts: CompileOpts,
+    packages: Vec<PackageId>,
+) -> Result<CompileInfo> {
     let ws = scarb::ops::read_workspace(config.manifest_path(), config)?;
-    let packages: Vec<scarb::core::PackageId> = ws.members().map(|p| p.id).collect();
     let resolve = scarb::ops::resolve_workspace(&ws)?;
 
     let compilation_units = scarb::ops::generate_compilation_units(&resolve, &opts.features, &ws)?

@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use clap::Args;
+use clap::{Args, Parser};
 use dojo_bindgen::{BuiltinPlugins, PluginManager};
 use dojo_lang::scarb_internal::compile_workspace;
 use dojo_world::manifest::MANIFESTS_DIR;
@@ -8,7 +8,7 @@ use prettytable::format::consts::FORMAT_NO_LINESEP_WITH_TITLE;
 use prettytable::{format, Cell, Row, Table};
 use scarb::core::{Config, TargetKind};
 use scarb::ops::CompileOpts;
-use scarb_ui::args::FeaturesSpec;
+use scarb_ui::args::{FeaturesSpec, PackagesFilter};
 use sozo_ops::statistics::{get_contract_statistics_for_dir, ContractStatistics};
 use tracing::trace;
 
@@ -43,6 +43,9 @@ pub struct BuildArgs {
 
     #[command(flatten)]
     pub features: FeaturesSpec,
+
+    #[command(flatten)]
+    pub packages_filter: PackagesFilter,
 }
 
 impl BuildArgs {
@@ -58,6 +61,8 @@ impl BuildArgs {
 
         let profile_dir = manifest_dir.join(MANIFESTS_DIR).join(profile_name);
         CleanArgs::clean_manifests(&profile_dir)?;
+        let packages =
+            self.packages_filter.match_many(&ws)?.into_iter().map(|p| p.id).collect::<Vec<_>>();
 
         let compile_info = compile_workspace(
             config,
@@ -66,6 +71,7 @@ impl BuildArgs {
                 exclude_targets: vec![TargetKind::TEST],
                 features: self.features.try_into()?,
             },
+            packages,
         )?;
         trace!(?compile_info, "Compiled workspace.");
 
@@ -137,17 +143,21 @@ impl BuildArgs {
 
         Ok(())
     }
+}
 
-    // implement default manually since `FeatureSpec` doesn't implement `Default` trait
-    pub fn default() -> Self {
-        let features =
-            FeaturesSpec { features: vec![], all_features: false, no_default_features: false };
+impl Default for BuildArgs {
+    fn default() -> Self {
+        // use the clap defaults
+        let features = FeaturesSpec::parse_from([""]);
+        let packages_filter = PackagesFilter::parse_from([""]);
+
         Self {
             features,
             typescript_v2: false,
             unity: false,
             bindings_output: "bindings".to_string(),
             stats: false,
+            packages_filter,
         }
     }
 }
@@ -217,6 +227,7 @@ mod tests {
             unity: true,
             typescript_v2: true,
             stats: true,
+            ..Default::default()
         };
         let result = build_args.run(&config);
         assert!(result.is_ok());
