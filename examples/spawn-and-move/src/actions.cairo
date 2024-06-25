@@ -1,4 +1,6 @@
 use dojo_examples::models::{Direction, Position, Vec2};
+#[cfg(feature: 'something')]
+use starknet::ContractAddress;
 
 #[dojo::interface]
 trait IActions {
@@ -7,6 +9,8 @@ trait IActions {
     fn set_player_config(ref world: IWorldDispatcher, name: ByteArray);
     fn get_player_position(world: @IWorldDispatcher) -> Position;
     fn reset_player_config(ref world: IWorldDispatcher);
+    #[cfg(feature: 'something')]
+    fn call_something(something_address: ContractAddress);
 }
 
 #[dojo::interface]
@@ -23,6 +27,8 @@ mod actions {
     use starknet::{ContractAddress, get_caller_address};
     use dojo_examples::models::{Position, Moves, Direction, Vec2, PlayerConfig, PlayerItem};
     use dojo_examples::utils::next_position;
+    #[cfg(feature: 'something')]
+    use dojo_examples::something::{ISomethingDispatcher, ISomethingDispatcherTrait};
 
     #[derive(Copy, Drop, Serde)]
     #[dojo::event]
@@ -114,6 +120,15 @@ mod actions {
         fn get_player_position(world: @IWorldDispatcher) -> Position {
             let player = get_caller_address();
             get!(world, player, (Position))
+        }
+
+        #[cfg(feature: 'something')]
+        fn call_something(something_address: ContractAddress) {
+            let something = ISomethingDispatcher {
+                contract_address: something_address
+            };
+
+            something.something();
         }
     }
 
