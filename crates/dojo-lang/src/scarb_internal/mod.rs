@@ -57,7 +57,7 @@ pub fn crates_config_for_compilation_unit(unit: &CairoCompilationUnit) -> AllCra
                             .contains(&SmolStr::new_inline("negative_impls")),
                         coupons: experimental_features.contains(&SmolStr::new_inline("coupons")),
                     },
-                    ..Default::default()
+                    cfg_set: component.cfg_set.clone(),
                 },
             )
         })
