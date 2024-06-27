@@ -60,6 +60,7 @@ pub struct TestArgs {
     #[arg(long, default_value_t = false)]
     print_resource_usage: bool,
 
+    /// Specify the features to activate.
     #[command(flatten)]
     feature: FeaturesSpec,
 }

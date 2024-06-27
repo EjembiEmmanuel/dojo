@@ -8,7 +8,7 @@ use prettytable::format::consts::FORMAT_NO_LINESEP_WITH_TITLE;
 use prettytable::{format, Cell, Row, Table};
 use scarb::core::{Config, TargetKind};
 use scarb::ops::CompileOpts;
-use scarb_ui::args::{FeaturesSpec, PackagesFilter};
+use scarb_ui::args::FeaturesSpec;
 use sozo_ops::statistics::{get_contract_statistics_for_dir, ContractStatistics};
 use tracing::trace;
 
@@ -41,11 +41,9 @@ pub struct BuildArgs {
     #[arg(long, help = "Display statistics about the compiled contracts")]
     pub stats: bool,
 
+    /// Specify the features to activate.
     #[command(flatten)]
     pub features: FeaturesSpec,
-
-    #[command(flatten)]
-    pub packages_filter: PackagesFilter,
 }
 
 impl BuildArgs {
@@ -61,8 +59,7 @@ impl BuildArgs {
 
         let profile_dir = manifest_dir.join(MANIFESTS_DIR).join(profile_name);
         CleanArgs::clean_manifests(&profile_dir)?;
-        let packages =
-            self.packages_filter.match_many(&ws)?.into_iter().map(|p| p.id).collect::<Vec<_>>();
+        let packages: Vec<scarb::core::PackageId> = ws.members().map(|p| p.id).collect();
 
         let compile_info = compile_workspace(
             config,
@@ -149,7 +146,6 @@ impl Default for BuildArgs {
     fn default() -> Self {
         // use the clap defaults
         let features = FeaturesSpec::parse_from([""]);
-        let packages_filter = PackagesFilter::parse_from([""]);
 
         Self {
             features,
@@ -157,7 +153,6 @@ impl Default for BuildArgs {
             unity: false,
             bindings_output: "bindings".to_string(),
             stats: false,
-            packages_filter,
         }
     }
 }
