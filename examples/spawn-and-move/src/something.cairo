@@ -5,7 +5,6 @@ trait ISomething {
 
 #[dojo::contract]
 mod something {
-
     #[abi(embed_v0)]
     impl ISomethingImpl of super::ISomething<ContractState> {
         fn something() {}

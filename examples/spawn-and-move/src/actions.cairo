@@ -124,9 +124,7 @@ mod actions {
 
         #[cfg(feature: 'something')]
         fn call_something(something_address: ContractAddress) {
-            let something = ISomethingDispatcher {
-                contract_address: something_address
-            };
+            let something = ISomethingDispatcher { contract_address: something_address };
 
             something.something();
         }
