@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1730585896892,
+  "lastUpdate": 1730586358972,
   "repoUrl": "https://github.com/EjembiEmmanuel/dojo",
   "entries": {
     "Benchmark": [
@@ -10735,6 +10735,54 @@ window.BENCHMARK_DATA = {
             "name": "build/Sozo.Cold",
             "value": 9651007543,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dev@glihm.net",
+            "name": "glihm",
+            "username": "glihm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "739518c1dfc7475c826ba5546ae0143102a2be6d",
+          "message": "ci: bump to 8 core Linux release",
+          "timestamp": "2024-11-02T10:57:25-06:00",
+          "tree_id": "c4b9d0db2995ac3f2391ffcadd58b31ad6a3aaa7",
+          "url": "https://github.com/EjembiEmmanuel/dojo/commit/739518c1dfc7475c826ba5546ae0143102a2be6d"
+        },
+        "date": 1730586357825,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "decompress world contract",
+            "value": 16490231,
+            "range": "± 132118",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "Concurrent.Simulate/Blockifier.1",
+            "value": 8491985,
+            "range": "± 281552",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "Concurrent.Simulate/Blockifier.1000",
+            "value": 3573265510,
+            "range": "± 757089542",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "Invoke.ERC20.transfer/Blockifier.Cold",
+            "value": 8438349,
+            "range": "± 37998",
             "unit": "ns/iter"
           }
         ]
