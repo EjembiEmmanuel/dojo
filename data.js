@@ -1,6 +1,6 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1719612573230,
-  "repoUrl": "https://github.com/dojoengine/dojo",
+  "lastUpdate": 1730585896892,
+  "repoUrl": "https://github.com/EjembiEmmanuel/dojo",
   "entries": {
     "Benchmark": [
       {
@@ -10705,6 +10705,36 @@ window.BENCHMARK_DATA = {
             "name": "decompress world contract",
             "value": 16561493,
             "range": "± 206663",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dev@glihm.net",
+            "name": "glihm",
+            "username": "glihm"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "739518c1dfc7475c826ba5546ae0143102a2be6d",
+          "message": "ci: bump to 8 core Linux release",
+          "timestamp": "2024-11-02T10:57:25-06:00",
+          "tree_id": "c4b9d0db2995ac3f2391ffcadd58b31ad6a3aaa7",
+          "url": "https://github.com/EjembiEmmanuel/dojo/commit/739518c1dfc7475c826ba5546ae0143102a2be6d"
+        },
+        "date": 1730585896434,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "build/Sozo.Cold",
+            "value": 9651007543,
+            "range": "± 0",
             "unit": "ns/iter"
           }
         ]
